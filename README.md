@@ -38,25 +38,25 @@ The above results are with marker and nougat setup so they each take ~4GB of VRA
 
 See [below](#benchmarks) for detailed speed and accuracy benchmarks, and instructions on how to run your own benchmarks.
 
-# Commercial usage
+## Commercial usage
 
 I want marker to be as widely accessible as possible, while still funding my development/training costs.  Research and personal usage is always okay, but there are some restrictions on commercial usage.
 
 The weights for the models are licensed `cc-by-nc-sa-4.0`, but I will waive that for any organization under $5M USD in gross revenue in the most recent 12-month period AND under $5M in lifetime VC/angel funding raised. If you want to remove the GPL license requirements (dual-license) and/or use the weights commercially over the revenue limit, check out the options [here](https://www.datalab.to).
 
-# Hosted API
+## Hosted API
 
 There's a hosted API for marker available [here](https://www.datalab.to/):
 
-- Supports PDFs, word documents, and powerpoints 
+- Supports PDFs, word documents, and powerpoints
 - 1/4th the price of leading cloud-based competitors
 - Leverages [Modal](https://modal.com/) for high reliability without latency spikes
 
-# Community
+## Community
 
 [Discord](https://discord.gg//KuZwXNGnfH) is where we discuss future development.
 
-# Limitations
+## Limitations
 
 PDF is a tricky format, so marker will not always work perfectly.  Here are some known limitations that are on the roadmap to address:
 
@@ -66,7 +66,7 @@ PDF is a tricky format, so marker will not always work perfectly.  Here are some
 - Not all lines/spans will be joined properly.
 - This works best on digital PDFs that won't require a lot of OCR.  It's optimized for speed, and limited OCR is used to fix errors.
 
-# Installation
+## Installation
 
 You'll need python 3.9+ and PyTorch.  You may need to install the CPU version of torch first if you're not using a Mac or a GPU machine.  See [here](https://pytorch.org/get-started/locally/) for more details.
 
@@ -76,13 +76,13 @@ Install with:
 pip install marker-pdf
 ```
 
-## Optional: OCRMyPDF
+### Optional: OCRMyPDF
 
 Only needed if you want to use the optional `ocrmypdf` as the ocr backend.  Note that `ocrmypdf` includes Ghostscript, an AGPL dependency, but calls it via CLI, so it does not trigger the license provisions.
 
 See the instructions [here](docs/install_ocrmypdf.md)
 
-# Usage
+## Usage
 
 First, some configuration:
 
@@ -90,7 +90,7 @@ First, some configuration:
 - Your torch device will be automatically detected, but you can override this.  For example, `TORCH_DEVICE=cuda`.
 - By default, marker will use `surya` for OCR.  Surya is slower on CPU, but more accurate than tesseract.  It also doesn't require you to specify the languages in the document.  If you want faster OCR, set `OCR_ENGINE` to `ocrmypdf`. This also requires external dependencies (see above).  If you don't want OCR at all, set `OCR_ENGINE` to `None`.
 
-## Interactive App
+### Interactive App
 
 I've included a streamlit app that lets you interactively try marker with some basic options.  Run it with:
 
@@ -99,7 +99,7 @@ pip install streamlit
 marker_gui
 ```
 
-## Convert a single file
+### Convert a single file
 
 ```shell
 marker_single /path/to/file.pdf /path/to/output/folder --batch_multiplier 2 --max_pages 10 
@@ -112,7 +112,7 @@ marker_single /path/to/file.pdf /path/to/output/folder --batch_multiplier 2 --ma
 
 The list of supported languages for surya OCR is [here](https://github.com/VikParuchuri/surya/blob/master/surya/languages.py).  If you need more languages, you can use any language supported by [Tesseract](https://tesseract-ocr.github.io/tessdoc/Data-Files#data-files-for-version-400-november-29-2016) if you set `OCR_ENGINE` to `ocrmypdf`.  If you don't need OCR, marker can work with any language.
 
-## Convert multiple files
+### Convert multiple files
 
 ```shell
 marker /path/to/input/folder /path/to/output/folder --workers 4 --max 10 --min_length 10000
@@ -123,7 +123,7 @@ marker /path/to/input/folder /path/to/output/folder --workers 4 --max 10 --min_l
 - `--min_length` is the minimum number of characters that need to be extracted from a pdf before it will be considered for processing.  If you're processing a lot of pdfs, I recommend setting this to avoid OCRing pdfs that are mostly images. (slows everything down)
 - `--metadata_file` is an optional path to a json file with metadata about the pdfs.  If you provide it, it will be used to set the language for each pdf.  Setting language is optional for surya (default), but required for tesseract. The format is:
 
-```
+```json
 {
   "pdf1.pdf": {"languages": ["English"]},
   "pdf2.pdf": {"languages": ["Spanish", "Russian"]},
@@ -133,7 +133,7 @@ marker /path/to/input/folder /path/to/output/folder --workers 4 --max 10 --min_l
 
 You can use language names or codes.  The exact codes depend on the OCR engine.  See [here](https://github.com/VikParuchuri/surya/blob/master/surya/languages.py) for a full list for surya codes, and [here](https://tesseract-ocr.github.io/tessdoc/Data-Files#data-files-for-version-400-november-29-2016) for tesseract.
 
-## Convert multiple files on multiple GPUs
+### Convert multiple files on multiple GPUs
 
 ```shell
 MIN_LENGTH=10000 METADATA_FILE=../pdf_meta.json NUM_DEVICES=4 NUM_WORKERS=15 marker_chunk_convert ../pdf_in ../md_out
@@ -146,7 +146,7 @@ MIN_LENGTH=10000 METADATA_FILE=../pdf_meta.json NUM_DEVICES=4 NUM_WORKERS=15 mar
 
 Note that the env variables above are specific to this script, and cannot be set in `local.env`.
 
-# Troubleshooting
+## Troubleshooting
 
 There are some settings that you may find useful if things aren't working the way you expect:
 
@@ -159,7 +159,7 @@ There are some settings that you may find useful if things aren't working the wa
 
 In general, if output is not what you expect, trying to OCR the PDF is a good first step.  Not all PDFs have good text/bboxes embedded in them.
 
-## Useful settings
+### Useful settings
 
 These settings can improve/change output quality:
 
@@ -168,20 +168,20 @@ These settings can improve/change output quality:
 - `EXTRACT_IMAGES` will extract images and save separately.  Default: True.
 - `BAD_SPAN_TYPES` specifies layout blocks to remove from the markdown output.
 
-# Benchmarks
+## Benchmarks
 
 Benchmarking PDF extraction quality is hard.  I've created a test set by finding books and scientific papers that have a pdf version and a latex source.  I convert the latex to text, and compare the reference to the output of text extraction methods.  It's noisy, but at least directionally correct.
 
 Benchmarks show that marker is 4x faster than nougat, and more accurate outside arXiv (nougat was trained on arXiv data).  We show naive text extraction (pulling text out of the pdf with no processing) for comparison.
 
-**Speed**
+### **Speed**
 
 | Method | Average Score | Time per page | Time per document |
 |--------|---------------|---------------|-------------------|
 | marker | 0.613721      | 0.631991      | 58.1432           |
 | nougat | 0.406603      | 2.59702       | 238.926           |
 
-**Accuracy**
+### **Accuracy**
 
 First 3 are non-arXiv books, last 3 are arXiv papers.
 
@@ -192,13 +192,13 @@ First 3 are non-arXiv books, last 3 are arXiv papers.
 
 Peak GPU memory usage during the benchmark is `4.2GB` for nougat, and `4.1GB` for marker.  Benchmarks were run on an A6000 Ada.
 
-**Throughput**
+#### **Throughput**
 
 Marker takes about 4GB of VRAM on average per task, so you can convert 12 documents in parallel on an A6000.
 
 ![Benchmark results](data/images/per_doc.png)
 
-## Running your own benchmarks
+### Running your own benchmarks
 
 You can benchmark the performance of marker on your machine. Install marker manually with:
 
@@ -217,7 +217,7 @@ This will benchmark marker against other text extraction methods.  It sets up ba
 
 Omit `--nougat` to exclude nougat from the benchmark.  I don't recommend running nougat on CPU, since it is very slow.
 
-### Table benchmark
+#### Table benchmark
 
 There is a benchmark for table parsing, which you can run with:
 
@@ -225,7 +225,7 @@ There is a benchmark for table parsing, which you can run with:
 python benchmarks/table.py test_data/tables.json
 ```
 
-# Thanks
+## Thanks
 
 This work would not have been possible without amazing open source models and datasets, including (but not limited to):
 
